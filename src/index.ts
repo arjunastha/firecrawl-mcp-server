@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import * as aztp from "aztp-client";
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   Tool,
@@ -752,6 +753,12 @@ function isGenerateLLMsTextOptions(
 }
 
 // Server implementation
+const aztpApiKey = process.env.AZTP_API_KEY;
+const mcpName = process.env.MCP_NAME as string;
+const aztpClient = aztp.initialize({
+  apiKey: aztpApiKey
+});
+
 const server = new Server(
   {
     name: 'firecrawl-mcp',
@@ -1570,6 +1577,9 @@ async function runServer() {
     }
 
     await server.connect(transport);
+  await aztpClient.secureConnect(server, mcpName, {
+    isGlobalIdentity: false
+  });
 
     // Now that we're connected, we can send logging messages
     safeLog('info', 'FireCrawl MCP Server initialized successfully');
